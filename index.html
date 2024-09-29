@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radio La Tuani</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            font-family: 'Helvetica Neue', sans-serif;
+            background-color: #232323;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 10px;
+        }
+        .radio-container {
+            text-align: center;
+            background: linear-gradient(145deg, #4a148c, #880e4f);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            width: 350px;
+        }
+        .logo {
+            width: 80%;
+            margin: 0 auto 20px;
+            display: block;
+            height: auto;
+            transition: transform 0.5s ease-in-out;
+        }
+        .music-active {
+            animation: pulse 1s infinite alternate;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+        .control-buttons .control-button {
+            background-color: #6a1b9a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .control-buttons .control-button:hover {
+            background-color: #7b1fa2;
+        }
+        .volume-controls {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .volume-controls i {
+            margin-right: 5px;
+        }
+        input[type="range"] {
+            flex: 1;
+        }
+        .social-media {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .social-media a {
+            color: #ffd740;
+            text-decoration: none;
+            font-size: 24px;
+            margin: 0 10px;
+        }
+        .timer-select {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .timer-select i {
+            margin-right: 10px;
+        }
+        select, .timer-display {
+            background-color: #6a1b9a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
+        }
+        select:hover, .timer-display:hover {
+            background-color: #7b1fa2;
+        }
+    </style>
+</head>
+<body>
+    <div class="radio-container">
+        <img src="https://i.pinimg.com/236x/00/d3/a5/00d3a50424a3d1b99be1c5b9a5a291c6.jpg" alt="Logo de Radio La Tuani" class="logo" id="radioLogo">
+        <div id="station-info">Vision de Dios - En vivo</div>
+        <div class="control-buttons">
+            <button id="playPauseBtn"><i id="playPauseIcon" class="fas fa-play"></i></button>
+        </div>
+        <div class="volume-controls">
+            <i class="fas fa-volume-up"></i>
+            <input type="range" id="volControl" min="0" max="100" step="1" value="50">
+        </div>
+        <div class="timer-select">
+            <i class="fas fa-hourglass-end"></i>
+            <select id="shutdownTimer">
+                <option value="0">Apagar en...</option>
+                <option value="300">5 minutos</option>
+                <option value="600">10 minutos</option>
+                <option value="900">15 minutos</option>
+                <option value="1800">30 minutos</option>
+                <option value="3600">1 hora</option>
+                <option value="5400">1 hora y 30 minutos</option>
+                <option value="7200">2 horas</option>
+            </select>
+        </div>
+        <div class="timer-display" id="timer">Temporizador: 00:00:00</div>
+        <div class="social-media">
+            <a href="https://facebook.com/RadioLaTuani"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://yourwebsite.com"><i class="fas fa-globe"></i></a>
+            <a href="https://instagram.com/RadioLaTuani"><i class="fab fa-instagram"></i></a>
+            <a href="https://youtube.com/RadioLaTuani"><i class="fab fa-youtube"></i></a>
+            <a href="https://wa.me/50512345678"><i class="fab fa-whatsapp"></i></a>
+        </div>
+        <div class="contact-info">
+            <p>Email: contacto@radiolatuani.com</p>
+            <p>Teléfono: +505 1234 5678</p>
+        </div>
+    </div>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+                console.log('Service Worker registered with scope:', registration.scope);
+            }).catch(function(error) {
+                console.log('Service Worker registration failed:', error);
+            });
+        }
+
+        const audio = new Audio('https://emisoras.alfasocialmedia.com.ar/8150/stream'); // Replace with your actual stream URL
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const playPauseIcon = document.getElementById('playPauseIcon');
+        const volControl = document.getElementById('volControl');
+        const radioLogo = document.getElementById('radioLogo');
+        const shutdownTimer = document.getElementById('shutdownTimer');
+        const timerDisplay = document.getElementById('timer');
+        let shutdownTimeout;
+
+        playPauseBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                playPauseIcon.className = 'fas fa-pause';
+                radioLogo.classList.add('music-active');
+            } else {
+                audio.pause();
+                playPauseIcon.className = 'fas fa-play';
+                radioLogo.classList.remove('music-active');
+            }
+        });
+
+        audio.addEventListener('play', () => {
+            playPauseIcon.className = 'fas fa-pause';
+            radioLogo.classList.add('music-active');
+        });
+
+        audio.addEventListener('pause', () => {
+            playPauseIcon.className = 'fas fa-play';
+            radioLogo.classList.remove('music-active');
+        });
+
+        volControl.addEventListener('input', () => {
+            audio.volume = volControl.value / 100;
+        });
+
+        shutdownTimer.addEventListener('change', function() {
+            clearTimeout(shutdownTimeout);
+            let seconds = parseInt(this.value, 10);
+            if (seconds > 0) {
+                let countdown = seconds;
+                shutdownTimeout = setInterval(() => {
+                    countdown--;
+                    let minutes = Math.floor(countdown / 60);
+                    let seconds = countdown % 60;
+                    timerDisplay.textContent = 'Temporizador: ' + minutes + ':' + (seconds < 10 ? '0' + seconds : seconds);
+                    if (countdown <= 0) {
+                        clearInterval(shutdownTimeout);
+                        audio.pause();
+                        playPauseIcon.className = 'fas fa-play';
+                        radioLogo.classList.remove('music-active');
+                    }
+                }, 1000);
+            } else {
+                timerDisplay.textContent = 'Temporizador: 00:00:00';
+            }
+        });
+    </script>
+</body>
+</html>
